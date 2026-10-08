@@ -10,7 +10,7 @@ describe("CustomerRepository - Integration Tests", () => {
     address: "1 rue de la Paix, Paris",
   });
 
-  const truncateTables = async () => {
+  beforeAll(async () => {
     await prisma.$transaction(async (tx) => {
       await tx.$executeRaw`SET FOREIGN_KEY_CHECKS = 0;`;
       await tx.$executeRaw`TRUNCATE TABLE projects;`;
@@ -18,10 +18,16 @@ describe("CustomerRepository - Integration Tests", () => {
       await tx.$executeRaw`TRUNCATE TABLE tasks;`;
       await tx.$executeRaw`SET FOREIGN_KEY_CHECKS = 1;`;
     });
-  };
+  });
 
-  beforeAll(truncateTables);
-  afterEach(truncateTables);
+  afterEach(async () => {
+    await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SET FOREIGN_KEY_CHECKS = 0;`;
+      await tx.$executeRaw`TRUNCATE TABLE projects;`;
+      await tx.$executeRaw`TRUNCATE TABLE customers;`;
+      await tx.$executeRaw`SET FOREIGN_KEY_CHECKS = 1;`;
+    });
+  });
 
   test("creates a customer", async () => {
     const data = buildCustomerData();
